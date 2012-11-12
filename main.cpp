@@ -1,6 +1,8 @@
 /*
   Josh Hartshorn
-  -Need to clean up repetitive code, and add a timer. ALso, once the game ends players should not be able to continue placing their marks.
+  Tic Tac Toe Clone
+  11/13/2012
+  -Need to clean up repetitive code, and add a timer to limit fps.
 
 */
 
@@ -398,6 +400,7 @@ int main ( int argc, char** argv )
         // message processing loop
         while (SDL_PollEvent(&event))
         {
+            if (!EndGame){
             //handle grid square events
             gridOne.handle_events(1);
             gridTwo.handle_events(2);
@@ -408,7 +411,7 @@ int main ( int argc, char** argv )
             gridSeven.handle_events(7);
             gridEight.handle_events(8);
             gridNine.handle_events(9);
-
+            }
             // check for messages
             switch (event.type)
             {
