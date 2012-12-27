@@ -2,16 +2,21 @@
   Josh Hartshorn
   Tic Tac Toe Clone
   11/13/2012
-
+  -Need to clean up repetitive code, and add a timer to limit fps.
+  -use a surface for loading all of the textures, and
+   then copy it to a texture and render it.
 
 */
 
-
+/* Linux
+#include "SDL2/SDL.h"
+#include "SDL2/SDL_image.h"
+#include "SDL2/SDL_ttf.h"
+*/
+//android
 #include "SDL.h"
 #include "SDL_image.h"
 #include "SDL_ttf.h"
-
-
    
 const int height = 540;
 const int width = 480;
