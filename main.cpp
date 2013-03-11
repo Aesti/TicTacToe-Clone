@@ -8,16 +8,16 @@
 
 */
 
-/* Linux
+//Linux
 #include "SDL2/SDL.h"
 #include "SDL2/SDL_image.h"
 #include "SDL2/SDL_ttf.h"
-*/
-//android
+
+/*android
 #include "SDL.h"
 #include "SDL_image.h"
 #include "SDL_ttf.h"
-   
+  */ 
 const int height = 540;
 const int width = 480;
 const int bpp = 32;
@@ -32,7 +32,6 @@ SDL_Surface Draw(SDL_Surface *img, SDL_Surface *screen, int x, int y)
     SDL_Rect location;
     location.x = x;
     location.y = y;
-
 
     SDL_BlitSurface(img, NULL, screen, &location);
 }
@@ -339,7 +338,7 @@ int main ( int argc, char** argv )
     Square gridNine( 320, 320,width/3,width/3);
 
 
-    SDL_Init(SDL_INIT_VIDEO);
+    SDL_Init(SDL_INIT_EVERYTHING);
     SDL_Window *window;
     SDL_Renderer* renderer;
     SDL_Surface* screen = SDL_CreateRGBSurface( 0, width, height, 32, 0, 0, 0, 0 );
@@ -347,15 +346,15 @@ int main ( int argc, char** argv )
 
     printf("sdl window created\n");
     window = SDL_CreateWindow("TicTacToe-SDL2",
-        SDL_WINDOWPOS_UNDEFINED,
-        SDL_WINDOWPOS_UNDEFINED,
+        SDL_WINDOWPOS_CENTERED,
+        SDL_WINDOWPOS_CENTERED,
         width,
         height,
         SDL_WINDOW_SHOWN);
     if (!window){
         printf("Failed to create window\n");
     }
-    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
     if ( !renderer )
     {
         printf("Unable to set 640x480 video: %s\n", SDL_GetError());
@@ -408,6 +407,7 @@ int main ( int argc, char** argv )
     printf("Game Loop Starting\n");
     bool EndGame = false;
     bool done = false;
+
     // program main loop
     while (!done)
     {
@@ -463,6 +463,7 @@ int main ( int argc, char** argv )
         //show updated grid screen
         DrawImage(GridBox, imgX, imgO, screen);
         // DRAWING ENDS HERE
+
         //win conditions
         //rows
         if (GridBox[0] == 1 && GridBox[1] == 1 && GridBox [2] == 1)
@@ -627,10 +628,11 @@ int main ( int argc, char** argv )
         }
 
         // finally, update the screen :)
-                textureImage = SDL_CreateTextureFromSurface(renderer,screen);
-                SDL_RenderClear(renderer);
-                SDL_RenderCopy(renderer, textureImage, NULL, NULL);
-                SDL_RenderPresent(renderer);
+        textureImage = SDL_CreateTextureFromSurface(renderer,screen);
+        SDL_RenderClear(renderer);
+        SDL_RenderCopy(renderer, textureImage, NULL, NULL);
+        SDL_RenderPresent(renderer);
+        SDL_DestroyTexture(textureImage);
     } // end main loop
 // free loaded bitmap
     SDL_FreeSurface(grid);
