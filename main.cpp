@@ -9,18 +9,26 @@
 */
 
 //Linux
+//
 #include "SDL2/SDL.h"
 #include "SDL2/SDL_image.h"
 #include "SDL2/SDL_ttf.h"
+#include <iostream>
+#include "SDL_video.h"
+//
+using namespace std;
 
 /*android
 #include "SDL.h"
 #include "SDL_image.h"
 #include "SDL_ttf.h"
-  */ 
-const int height = 540;
-const int width = 480;
+*/
+int height = 540;
+int width = 480;
 const int bpp = 32;
+const int FPS = 20;
+int gridW = width/3; //grid dimension width
+int* gameboard_height = NULL;
 
 int GridBox[9] = {};
 int player = 1;
@@ -43,6 +51,125 @@ public:
     Square( int x, int y, int w, int h);
     void handle_events(int numberSquare);
 };
+//The timer
+class Timer
+{
+    private:
+    //The clock time when the timer started
+    int startTicks;
+
+    //The ticks stored when the timer was paused
+    int pausedTicks;
+
+    //The timer status
+    bool paused;
+    bool started;
+
+    public:
+    //Initializes variables
+    Timer();
+
+    //The various clock actions
+    void start();
+    void stop();
+    void pause();
+    void unpause();
+
+    //Gets the timer's time
+    int get_ticks();
+
+    //Checks the status of the timer
+    bool is_started();
+    bool is_paused();
+};
+Timer::Timer()
+{
+    //Initialize the variables
+    startTicks = 0;
+    pausedTicks = 0;
+    paused = false;
+    started = false;
+}
+void Timer::start()
+{
+    //Start the timer
+    started = true;
+
+    //Unpause the timer
+    paused = false;
+
+    //Get the current clock time
+    startTicks = SDL_GetTicks();
+}
+
+void Timer::stop()
+{
+    //Stop the timer
+    started = false;
+
+    //Unpause the timer
+    paused = false;
+}
+
+void Timer::pause()
+{
+    //If the timer is running and isn't already paused
+    if( ( started == true ) && ( paused == false ) )
+    {
+        //Pause the timer
+        paused = true;
+
+        //Calculate the paused ticks
+        pausedTicks = SDL_GetTicks() - startTicks;
+    }
+}
+void Timer::unpause()
+{
+    //If the timer is paused
+    if( paused == true )
+    {
+        //Unpause the timer
+        paused = false;
+
+        //Reset the starting ticks
+        startTicks = SDL_GetTicks() - pausedTicks;
+
+        //Reset the paused ticks
+        pausedTicks = 0;
+    }
+}
+
+int Timer::get_ticks()
+{
+    //If the timer is running
+    if( started == true )
+    {
+        //If the timer is paused
+        if( paused == true )
+        {
+            //Return the number of ticks when the timer was paused
+            return pausedTicks;
+        }
+        else
+        {
+            //Return the current time minus the start time
+            return SDL_GetTicks() - startTicks;
+        }
+    }
+
+    //If the timer isn't running
+    return 0;
+}
+
+bool Timer::is_started()
+{
+    return started;
+}
+
+bool Timer::is_paused()
+{
+    return paused;
+}
 Square::Square ( int x, int y, int w, int h)
 {
     box.x = x;
@@ -245,6 +372,8 @@ void Square::handle_events(int numberSquare)
 //this can be cleaned up. perhaps with a for loop!
 void DrawImage(int*GridBox, SDL_Surface *imgX, SDL_Surface *imgO, SDL_Surface *screen)
 {
+    int screen_width = screen -> w;
+    int screen_height = screen -> h;
     //row 1
     if (GridBox[0] == 1)
     {
@@ -256,19 +385,19 @@ void DrawImage(int*GridBox, SDL_Surface *imgX, SDL_Surface *imgO, SDL_Surface *s
     }
     if (GridBox[1] == 1)
     {
-        Draw(imgX,screen, 180,20);
+        Draw(imgX,screen, gridW + 20,20);
     }
     else if (GridBox[1] == 2)
     {
-        Draw(imgO, screen, 180, 20);
+        Draw(imgO, screen, gridW + 20, 20);
     }
     if (GridBox[2] == 1)
     {
-        Draw(imgX,screen, 340,20);
+        Draw(imgX,screen, (gridW * 2) + 20,20);
     }
     else if (GridBox[2] == 2)
     {
-        Draw(imgO, screen, 340, 20);
+        Draw(imgO, screen, (gridW * 2) + 20, 20);
     }
     //row 2
     if (GridBox[3] == 1)
@@ -281,19 +410,19 @@ void DrawImage(int*GridBox, SDL_Surface *imgX, SDL_Surface *imgO, SDL_Surface *s
     }
     if (GridBox[4] == 1)
     {
-        Draw(imgX,screen, 180,180);
+        Draw(imgX,screen, gridW + 20,180);
     }
     else if (GridBox[4] == 2)
     {
-        Draw(imgO, screen, 180, 180);
+        Draw(imgO, screen, gridW + 20, 180);
     }
     if (GridBox[5] == 1)
     {
-        Draw(imgX,screen, 340,180);
+        Draw(imgX,screen, (gridW * 2) + 20,180);
     }
     else if (GridBox[5] == 2)
     {
-        Draw(imgO, screen, 340, 180);
+        Draw(imgO, screen, (gridW * 2) + 20, 180);
     }
     // row 3
     if (GridBox[6] == 1)
@@ -306,43 +435,42 @@ void DrawImage(int*GridBox, SDL_Surface *imgX, SDL_Surface *imgO, SDL_Surface *s
     }
     if (GridBox[7] == 1)
     {
-        Draw(imgX,screen, 180,340);
+        Draw(imgX,screen, gridW + 20,340);
     }
     else if (GridBox[7] == 2)
     {
-        Draw(imgO, screen, 180, 340);
+        Draw(imgO, screen, gridW + 20, 340);
     }
     if (GridBox[8] == 1)
     {
-        Draw(imgX,screen, 340,340);
+        Draw(imgX,screen, (gridW * 2) + 20,340);
     }
     else if (GridBox[8] == 2)
     {
-        Draw(imgO, screen, 340, 340);
+        Draw(imgO, screen, (gridW * 2) + 20, 340);
     }
 }
 int main ( int argc, char** argv )
 {
-    //make grid squares
-    //row 1
-    Square gridOne( 0, 0,width/3,width/3);
-    Square gridTwo( 160, 0,width/3,width/3);
-    Square gridThree( 320, 0,width/3,width/3);
-    // row 2
-    Square gridFour( 0, 160,width/3,width/3);
-    Square gridFive( 160, 160,width/3,width/3);
-    Square gridSix( 320, 160,width/3,width/3);
-    // row 3
-    Square gridSeven( 0, 320,width/3,width/3);
-    Square gridEight( 160, 320,width/3,width/3);
-    Square gridNine( 320, 320,width/3,width/3);
+    SDL_DisplayMode mode;
+    //Keep track of the current frame
+    int frame = 0;
 
+    //Whether or not to cap the frame rate
+    bool cap = true;
+
+    //The frame rate regulator
+    Timer fps;
 
     SDL_Init(SDL_INIT_EVERYTHING);
     SDL_Window *window;
     SDL_Renderer* renderer;
-    SDL_Surface* screen = SDL_CreateRGBSurface( 0, width, height, 32, 0, 0, 0, 0 );
+    SDL_Surface* screen = SDL_CreateRGBSurface( 0, width, height, 32, 0, 0, 0, 0 ); 
     SDL_Texture *textureImage = NULL;
+
+    SDL_GetDesktopDisplayMode(&mode);
+    printf ("The desktop display mode is %d x %d, %d Hz, %d BPP\n",
+            mode.w, mode.h, mode.refresh_rate, SDL_BITSPERPIXEL(mode.format));
 
     printf("sdl window created\n");
     window = SDL_CreateWindow("TicTacToe-SDL2",
@@ -378,6 +506,23 @@ int main ( int argc, char** argv )
         printf("Unable to load PNG: %s\n", SDL_GetError());
         return 1;
     }
+    //I needed to find a way to get the true dimensions of the game board so I can properly size the grid squares
+    int messageheight = messagebox -> h;
+    int screenheight = screen -> h;
+    int boardheight = screenheight - messageheight; 
+    //make grid squares
+    //row 1
+    Square gridOne( 0, 0, width/3,boardheight/3);
+    Square gridTwo( gridW, 0,width/3,boardheight/3);
+    Square gridThree( gridW * 2, 0,width/3,boardheight/3);
+    // row 2
+    Square gridFour( 0, boardheight/3,width/3,boardheight/3);
+    Square gridFive( gridW, boardheight/3,width/3,boardheight/3);
+    Square gridSix( gridW * 2, boardheight/3,width/3,boardheight/3);
+    // row 3
+    Square gridSeven( 0, (boardheight/3) * 2,width/3,boardheight/3);
+    Square gridEight( gridW, (boardheight/3) * 2,width/3,boardheight/3);
+    Square gridNine( gridW * 2, (boardheight/3) * 2,width/3,boardheight/3);
     SDL_Surface *imgX = IMG_Load("x.png");
     if (!imgX)
     {
@@ -407,25 +552,12 @@ int main ( int argc, char** argv )
     printf("Game Loop Starting\n");
     bool EndGame = false;
     bool done = false;
-
     // program main loop
     while (!done)
     {
         // message processing loop
         while (SDL_PollEvent(&event))
         {
-            if (!EndGame){
-            //handle grid square events
-            gridOne.handle_events(1);
-            gridTwo.handle_events(2);
-            gridThree.handle_events(3);
-            gridFour.handle_events(4);
-            gridFive.handle_events(5);
-            gridSix.handle_events(6);
-            gridSeven.handle_events(7);
-            gridEight.handle_events(8);
-            gridNine.handle_events(9);
-            }
             // check for messages
             switch (event.type)
             {
@@ -442,12 +574,29 @@ int main ( int argc, char** argv )
                     done = true;
                 break;
             }
+            case SDL_MOUSEBUTTONDOWN:
+            {
+                cout << "mouse clicked" << endl;
+                if (!EndGame){
+                //handle grid square events
+                gridOne.handle_events(1);
+                gridTwo.handle_events(2);
+                gridThree.handle_events(3);
+                gridFour.handle_events(4);
+                gridFive.handle_events(5);
+                gridSix.handle_events(6);
+                gridSeven.handle_events(7);
+                gridEight.handle_events(8);
+                gridNine.handle_events(9);
+                }
+            }
+                
             } // end switch
         } // end of message processing
-
+        frame++;
         // DRAWING STARTS HERE
         Draw(grid,screen,0,0);
-        Draw(messagebox,screen,0,480);
+        Draw(messagebox,screen,0,height-messageheight);
         // player turn (1 or 2)
         if((player %2) == 1)
         {
@@ -460,10 +609,14 @@ int main ( int argc, char** argv )
             Draw( message, screen, 0, height-50);
         }
 
-        //show updated grid screen
         DrawImage(GridBox, imgX, imgO, screen);
         // DRAWING ENDS HERE
-
+        //Limit frame rate
+        if( ( cap == true ) && ( fps.get_ticks() < 1000 / FPS ) )
+        {
+            //Sleep the remaining frame time
+            SDL_Delay( ( 1000 / FPS ) - fps.get_ticks() );
+        }
         //win conditions
         //rows
         if (GridBox[0] == 1 && GridBox[1] == 1 && GridBox [2] == 1)
@@ -564,7 +717,7 @@ int main ( int argc, char** argv )
 
             if (winner == 1)
             {
-                Draw(messagebox,screen,0,480);
+                Draw(messagebox,screen,0,height - messageheight);
                 message = TTF_RenderText_Solid( font, "Player 1 has won!", textColor );
                 replay_message = TTF_RenderText_Solid( font, "Press R to replay", textColor );
                 Draw( message, screen, 0, height-50);
@@ -581,7 +734,7 @@ int main ( int argc, char** argv )
             }
             else if (winner == 2)
             {
-                Draw(messagebox,screen,0,480);
+                Draw(messagebox,screen,0,height - messageheight);
                 message = TTF_RenderText_Solid( font, "Player 2 has won!", textColor );
                 Draw( message, screen, 0,height-50);
                 replay_message = TTF_RenderText_Solid( font, "Press R to replay", textColor );
@@ -629,6 +782,7 @@ int main ( int argc, char** argv )
 
         // finally, update the screen :)
         textureImage = SDL_CreateTextureFromSurface(renderer,screen);
+
         SDL_RenderClear(renderer);
         SDL_RenderCopy(renderer, textureImage, NULL, NULL);
         SDL_RenderPresent(renderer);
