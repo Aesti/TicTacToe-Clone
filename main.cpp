@@ -10,20 +10,20 @@
 
 //Linux
 //
-//#include "SDL2/SDL.h"
-//#include "SDL2/SDL_image.h"
-//#include "SDL2/SDL_ttf.h"
-//#include <iostream>
+#include "SDL2/SDL.h"
+#include "SDL2/SDL_image.h"
+#include "SDL2/SDL_ttf.h"
+#include <iostream>
 //
 using namespace std;
 
 //android
-#include "SDL.h"
-#include "SDL_image.h"
-#include "SDL_ttf.h"
-#include <iostream>
+//#include "SDL.h"
+//#include "SDL_image.h"
+//#include "SDL_ttf.h"
+//#include <iostream>
 //
-int height = 540; //completely ignored on android
+int height = 640; //completely ignored on android
 int width = 480; // also completely ignored on android
 const int bpp = 32;
 const int FPS = 20;
@@ -375,80 +375,82 @@ void Square::handle_events(int numberSquare)
 //this can be cleaned up. perhaps with a for loop!
 void DrawImage(int*GridBox, SDL_Surface *imgX, SDL_Surface *imgO, SDL_Surface *screen)
 {
-    //row 1
+    //row 1 // column one image starts 4% of total assuming image size of 120 pixels
+            // column two image starts at 38% of total
+            // column three image starts at 71%
     if (GridBox[0] == 1)
     {
-        Draw(imgX,screen, 20,((height-messageheight)/12));
+        Draw(imgX,screen, (width * .04),((height-messageheight)/12));
     }
     else if (GridBox[0] == 2)
     {
-        Draw(imgO, screen, 20, ((height- messageheight)/12));
+        Draw(imgO, screen, (width * .04), ((height- messageheight)/12));
     }
     if (GridBox[1] == 1)
     {
-        Draw(imgX,screen, width/3 + 20,((height-messageheight)/12));
+        Draw(imgX,screen, width * .38,((height-messageheight)/12));
     }
     else if (GridBox[1] == 2)
     {
-        Draw(imgO, screen, width/3 + 20,((height-messageheight)/12));
+        Draw(imgO, screen, width * .38,((height-messageheight)/12));
     }
     if (GridBox[2] == 1)
     {
-        Draw(imgX,screen, (width/3 * 2) + 20,((height-messageheight)/12));
+        Draw(imgX,screen, (width * .71),((height-messageheight)/12));
     }
     else if (GridBox[2] == 2)
     {
-        Draw(imgO, screen, (width/3 * 2) + 20,((height-messageheight)/12));
+        Draw(imgO, screen, (width * .71),((height-messageheight)/12));
     }
     //row 2
     if (GridBox[3] == 1)
     {
-        Draw(imgX,screen, 20,((height-messageheight)/2)-imgO->h/2);
+        Draw(imgX,screen, width * .04,((height-messageheight)/2)-imgO->h/2);
     }
     else if (GridBox[3] == 2)
     {
-        Draw(imgO, screen, 20, ((height-messageheight)/2)-imgO->h/2);
+        Draw(imgO, screen, width * .04, ((height-messageheight)/2)-imgO->h/2);
     }
     if (GridBox[4] == 1)
     {
-        Draw(imgX,screen, width/3 + 20,((height-messageheight)/2)-imgO->h/2);
+        Draw(imgX,screen, width * .38,((height-messageheight)/2)-imgO->h/2);
     }
     else if (GridBox[4] == 2)
     {
-        Draw(imgO, screen, width/3 + 20, ((height-messageheight)/2)-imgO->h/2);
+        Draw(imgO, screen, width * .38, ((height-messageheight)/2)-imgO->h/2);
     }
     if (GridBox[5] == 1)
     {
-        Draw(imgX,screen, (width/3 * 2) + 20,((height-messageheight)/2)-imgO->h/2);
+        Draw(imgX,screen, width * .71,((height-messageheight)/2)-imgO->h/2);
     }
     else if (GridBox[5] == 2)
     {
-        Draw(imgO, screen, (width/3 * 2) + 20, ((height-messageheight)/2)-imgO->h/2);
+        Draw(imgO, screen, width * .71, ((height-messageheight)/2)-imgO->h/2);
     }
     // row 3
     if (GridBox[6] == 1)
     {
-        Draw(imgX,screen, 20,(height-messageheight) * .75);
+        Draw(imgX,screen, width * .04,(height-messageheight) * .75);
     }
     else if (GridBox[6] == 2)
     {
-        Draw(imgO, screen, 20, (height-messageheight) * .75);
+        Draw(imgO, screen, width * .04, (height-messageheight) * .75);
     }
     if (GridBox[7] == 1)
     {
-        Draw(imgX,screen, width/3 + 20,(height-messageheight) * .75);
+        Draw(imgX,screen, width * .38,(height-messageheight) * .75);
     }
     else if (GridBox[7] == 2)
     {
-        Draw(imgO, screen, width/3 + 20, (height-messageheight) * .75);
+        Draw(imgO, screen, width * .38, (height-messageheight) * .75);
     }
     if (GridBox[8] == 1)
     {
-        Draw(imgX,screen, (width/3 * 2) + 20,(height-messageheight) * .75);
+        Draw(imgX,screen, width * .71,(height-messageheight) * .75);
     }
     else if (GridBox[8] == 2)
     {
-        Draw(imgO, screen, (width/3 * 2) + 20, (height-messageheight)* .75);
+        Draw(imgO, screen, width * .71, (height-messageheight)* .75);
     }
 }
 void SDL_PutPixel(SDL_Surface *surface, int x, int y, Uint32 pixel)
@@ -540,7 +542,7 @@ int main ( int argc, char** argv )
     renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
     if ( !renderer )
     {
-        printf("Unable to set 640x480 video: %s\n", SDL_GetError());
+        printf("Unable to set video: %s\n", SDL_GetError());
         return 1;
     }
     //Initialize SDL_ttf
@@ -557,12 +559,6 @@ int main ( int argc, char** argv )
     cout << "height: " << height << endl;
     cout << "width: " << width << endl;
     // load images
-    SDL_Surface *grid = IMG_Load("table.png");
-    if (!grid)
-    {
-        printf("Unable to load PNG: %s\n", SDL_GetError());
-        return 1;
-    }
     SDL_Surface *messagebox = IMG_Load("messagebox.png");
     if (!messagebox)
     {
@@ -574,20 +570,19 @@ int main ( int argc, char** argv )
     int screenheight = screen -> h;
     int boardheight = screenheight - messageheight; 
     //make grid squares
-    //I should also draw the game board here - no need to load an image
     //row 1
 //x, y , width, height
-    Square gridOne( 0, 0, width/3,(height/3)-messageheight);
-    Square gridTwo( width/3, 0,width/3,(height/3)-messageheight);
-    Square gridThree( width/3 * 2, 0,width/3,(height/3)-messageheight);
+    Square gridOne( 0, 0, width/3,(boardheight/3));
+    Square gridTwo( width/3, 0,width/3,(boardheight/3));
+    Square gridThree( width/3 * 2, 0,width/3,(boardheight/3));
     // row 2
-    Square gridFour( 0, boardheight/3,width/3,(height/3)-messageheight);
-    Square gridFive( width/3, boardheight/3,width/3,(height/3)-messageheight);
-    Square gridSix( width/3 * 2, boardheight/3,width/3,(height/3)-messageheight);
+    Square gridFour( 0, boardheight/3,width/3,(boardheight/3));
+    Square gridFive( width/3, boardheight/3,width/3,(boardheight/3));
+    Square gridSix( width/3 * 2, boardheight/3,width/3,(boardheight/3));
     // row 3
-    Square gridSeven( 0, (boardheight/3) * 2,width/3,(height/3)-messageheight);
-    Square gridEight( width/3, (boardheight/3) * 2,width/3,(height/3)-messageheight);
-    Square gridNine( width/3 * 2, (boardheight/3) * 2,width/3,(height/3)-messageheight);
+    Square gridSeven( 0, (boardheight/3) * 2,width/3,(boardheight/3));
+    Square gridEight( width/3, (boardheight/3) * 2,width/3,(boardheight/3));
+    Square gridNine( width/3 * 2, (boardheight/3) * 2,width/3,(boardheight/3));
     SDL_Surface *imgX = IMG_Load("x.png");
     if (!imgX)
     {
@@ -609,7 +604,7 @@ int main ( int argc, char** argv )
     SDL_Surface *end_message = NULL;
     SDL_Surface *replay_message = NULL;
 
-    font = TTF_OpenFont( "argos.ttf", 28 );
+    font = TTF_OpenFont( "argos.ttf", 25 );
     if( !font )
     {
         return false;
@@ -665,7 +660,6 @@ int main ( int argc, char** argv )
         frame++;
 
         // DRAWING STARTS HERE
-        //Draw(grid,screen,0,0);
         SDL_FillRect(screen,NULL,SDL_MapRGB ( screen->format, 0, 0, 0 )); 
         Draw(messagebox,screen,0,height-messageheight);
         SDL_DrawLine(screen,0, (height/3)-messageheight/2, width, (height/3)-messageheight/2,255);
@@ -864,7 +858,6 @@ int main ( int argc, char** argv )
         SDL_DestroyTexture(textureImage);
     } // end main loop
 // free loaded bitmap
-    SDL_FreeSurface(grid);
     SDL_FreeSurface(imgX);
     SDL_FreeSurface(imgO);
     SDL_FreeSurface(message);
