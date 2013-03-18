@@ -10,19 +10,18 @@
 
 //Linux
 //
-#include "SDL2/SDL.h"
-#include "SDL2/SDL_image.h"
-#include "SDL2/SDL_ttf.h"
-#include "SDL_draw.h"
-#include <iostream>
+//#include "SDL2/SDL.h"
+//#include "SDL2/SDL_image.h"
+//#include "SDL2/SDL_ttf.h"
+//#include <iostream>
 //
 using namespace std;
 
 //android
-//#include "SDL.h"
-//#include "SDL_image.h"
-//#include "SDL_ttf.h"
-//#include <iostream>
+#include "SDL.h"
+#include "SDL_image.h"
+#include "SDL_ttf.h"
+#include <iostream>
 //
 int height = 540; //completely ignored on android
 int width = 480; // also completely ignored on android
@@ -33,6 +32,7 @@ int GridBox[9] = {};
 int player = 1;
 int winner = 0;
 SDL_Event event;
+int messageheight = 0;
 
 SDL_Surface Draw(SDL_Surface *img, SDL_Surface *screen, int x, int y)
 {;
@@ -378,78 +378,139 @@ void DrawImage(int*GridBox, SDL_Surface *imgX, SDL_Surface *imgO, SDL_Surface *s
     //row 1
     if (GridBox[0] == 1)
     {
-        Draw(imgX,screen, 20,20);
+        Draw(imgX,screen, 20,((height-messageheight)/12));
     }
     else if (GridBox[0] == 2)
     {
-        Draw(imgO, screen, 20, 20);
+        Draw(imgO, screen, 20, ((height- messageheight)/12));
     }
     if (GridBox[1] == 1)
     {
-        Draw(imgX,screen, width/3 + 20,20);
+        Draw(imgX,screen, width/3 + 20,((height-messageheight)/12));
     }
     else if (GridBox[1] == 2)
     {
-        Draw(imgO, screen, width/3 + 20, 20);
+        Draw(imgO, screen, width/3 + 20,((height-messageheight)/12));
     }
     if (GridBox[2] == 1)
     {
-        Draw(imgX,screen, (width/3 * 2) + 20,20);
+        Draw(imgX,screen, (width/3 * 2) + 20,((height-messageheight)/12));
     }
     else if (GridBox[2] == 2)
     {
-        Draw(imgO, screen, (width/3 * 2) + 20, 20);
+        Draw(imgO, screen, (width/3 * 2) + 20,((height-messageheight)/12));
     }
     //row 2
     if (GridBox[3] == 1)
     {
-        Draw(imgX,screen, 20,180);
+        Draw(imgX,screen, 20,((height-messageheight)/2)-imgO->h/2);
     }
     else if (GridBox[3] == 2)
     {
-        Draw(imgO, screen, 20, 180);
+        Draw(imgO, screen, 20, ((height-messageheight)/2)-imgO->h/2);
     }
     if (GridBox[4] == 1)
     {
-        Draw(imgX,screen, width/3 + 20,180);
+        Draw(imgX,screen, width/3 + 20,((height-messageheight)/2)-imgO->h/2);
     }
     else if (GridBox[4] == 2)
     {
-        Draw(imgO, screen, width/3 + 20, 180);
+        Draw(imgO, screen, width/3 + 20, ((height-messageheight)/2)-imgO->h/2);
     }
     if (GridBox[5] == 1)
     {
-        Draw(imgX,screen, (width/3 * 2) + 20,180);
+        Draw(imgX,screen, (width/3 * 2) + 20,((height-messageheight)/2)-imgO->h/2);
     }
     else if (GridBox[5] == 2)
     {
-        Draw(imgO, screen, (width/3 * 2) + 20, 180);
+        Draw(imgO, screen, (width/3 * 2) + 20, ((height-messageheight)/2)-imgO->h/2);
     }
     // row 3
     if (GridBox[6] == 1)
     {
-        Draw(imgX,screen, 20,340);
+        Draw(imgX,screen, 20,(height-messageheight) * .75);
     }
     else if (GridBox[6] == 2)
     {
-        Draw(imgO, screen, 20, 340);
+        Draw(imgO, screen, 20, (height-messageheight) * .75);
     }
     if (GridBox[7] == 1)
     {
-        Draw(imgX,screen, width/3 + 20,340);
+        Draw(imgX,screen, width/3 + 20,(height-messageheight) * .75);
     }
     else if (GridBox[7] == 2)
     {
-        Draw(imgO, screen, width/3 + 20, 340);
+        Draw(imgO, screen, width/3 + 20, (height-messageheight) * .75);
     }
     if (GridBox[8] == 1)
     {
-        Draw(imgX,screen, (width/3 * 2) + 20,340);
+        Draw(imgX,screen, (width/3 * 2) + 20,(height-messageheight) * .75);
     }
     else if (GridBox[8] == 2)
     {
-        Draw(imgO, screen, (width/3 * 2) + 20, 340);
+        Draw(imgO, screen, (width/3 * 2) + 20, (height-messageheight)* .75);
     }
+}
+void SDL_PutPixel(SDL_Surface *surface, int x, int y, Uint32 pixel)
+{
+    int bpp = surface->format->BytesPerPixel;
+    /* Here p is the address to the pixel we want to set */
+    Uint8 *p = (Uint8 *)surface->pixels + y * surface->pitch + x * bpp;
+
+    switch(bpp) {
+    case 1:
+        *p = pixel;
+        break;
+
+    case 2:
+        *(Uint16 *)p = pixel;
+        break;
+
+    case 3:
+        if(SDL_BYTEORDER == SDL_BIG_ENDIAN) {
+            p[0] = (pixel >> 16) & 0xff;
+            p[1] = (pixel >> 8) & 0xff;
+            p[2] = pixel & 0xff;
+        } else {
+            p[0] = pixel & 0xff;
+            p[1] = (pixel >> 8) & 0xff;
+            p[2] = (pixel >> 16) & 0xff;
+        }
+        break;
+
+    case 4:
+        *(Uint32 *)p = pixel;
+        break;
+    }
+}
+void SDL_DrawLine(SDL_Surface* pDestination, int pX1, int pY1, int pX2, int pY2, Uint32 pColour )
+{
+    int lenX = pX2 - pX1;
+    int lenY = pY2 - pY1;
+
+    float vectorLen = sqrtf(lenX * lenX + lenY * lenY);
+    if(vectorLen == 0)
+        return;
+
+    float inclineX = lenX / vectorLen;
+    float inclineY = lenY / vectorLen;
+
+    float x = (int)pX1;
+    float y = (int)pY1;
+
+    bool locked = SDL_MUSTLOCK(pDestination);
+    if(locked)
+        SDL_LockSurface(pDestination);
+
+    for(int i = 0; i < (int)vectorLen; ++i)
+    {
+        SDL_PutPixel(pDestination, (int)x, (int)y, pColour);
+        x += inclineX;
+        y += inclineY;
+    }
+
+    if(locked)
+        SDL_UnlockSurface(pDestination);
 }
 int main ( int argc, char** argv )
 {
@@ -509,7 +570,7 @@ int main ( int argc, char** argv )
         return 1;
     }
     //I need to find a way to get the true dimensions of the game board so I can properly size the grid squares
-    int messageheight = messagebox -> h; cout << "message height" << messageheight;
+    messageheight = messagebox -> h; cout << "message height" << messageheight << endl;
     int screenheight = screen -> h;
     int boardheight = screenheight - messageheight; 
     //make grid squares
@@ -604,8 +665,13 @@ int main ( int argc, char** argv )
         frame++;
 
         // DRAWING STARTS HERE
-        Draw(grid,screen,0,0);
+        //Draw(grid,screen,0,0);
+        SDL_FillRect(screen,NULL,SDL_MapRGB ( screen->format, 0, 0, 0 )); 
         Draw(messagebox,screen,0,height-messageheight);
+        SDL_DrawLine(screen,0, (height/3)-messageheight/2, width, (height/3)-messageheight/2,255);
+        SDL_DrawLine(screen,0, (height/3 + height/3)-messageheight/2, width, (height/3 + height/3)-messageheight/2,255);
+        SDL_DrawLine(screen,width/3, 0, width/3, height-messageheight,255);
+        SDL_DrawLine(screen,width/3+width/3, 0, width/3+width/3, height-messageheight,255);
         // player turn (1 or 2)
         if((player %2) == 1)
         {
