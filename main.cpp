@@ -13,22 +13,21 @@
 #include "SDL2/SDL.h"
 #include "SDL2/SDL_image.h"
 #include "SDL2/SDL_ttf.h"
+#include "SDL_draw.h"
 #include <iostream>
-#include "SDL_video.h"
 //
 using namespace std;
 
-/*android
-#include "SDL.h"
-#include "SDL_image.h"
-#include "SDL_ttf.h"
-*/
-int height = 540;
-int width = 480;
+//android
+//#include "SDL.h"
+//#include "SDL_image.h"
+//#include "SDL_ttf.h"
+//#include <iostream>
+//
+int height = 540; //completely ignored on android
+int width = 480; // also completely ignored on android
 const int bpp = 32;
 const int FPS = 20;
-int gridW = width/3; //grid dimension width
-int* gameboard_height = NULL;
 
 int GridBox[9] = {};
 int player = 1;
@@ -185,8 +184,12 @@ void Square::handle_events(int numberSquare)
     if(event.type == SDL_MOUSEBUTTONDOWN)
     {
         //get the mouse offsets
-        x = event.motion.x;
-        y = event.motion.y;
+        //x = event.motion.x;
+        //y = event.motion.y;
+
+        SDL_GetMouseState(&x, &y);
+
+        cout << "x: " << x << "y: " << y << endl;
 
         //If a square is clicked
         if((x > box.x) && ( x < box.x + box.w ) && ( y > box.y ) && ( y < box.y + box.h ))
@@ -271,7 +274,7 @@ void Square::handle_events(int numberSquare)
                 }
                 break;
             case 5:
-                //square two
+                //row two
                 if((player % 2) == 1)
                 {
                     if(GridBox[4]== 0)
@@ -372,8 +375,6 @@ void Square::handle_events(int numberSquare)
 //this can be cleaned up. perhaps with a for loop!
 void DrawImage(int*GridBox, SDL_Surface *imgX, SDL_Surface *imgO, SDL_Surface *screen)
 {
-    int screen_width = screen -> w;
-    int screen_height = screen -> h;
     //row 1
     if (GridBox[0] == 1)
     {
@@ -385,19 +386,19 @@ void DrawImage(int*GridBox, SDL_Surface *imgX, SDL_Surface *imgO, SDL_Surface *s
     }
     if (GridBox[1] == 1)
     {
-        Draw(imgX,screen, gridW + 20,20);
+        Draw(imgX,screen, width/3 + 20,20);
     }
     else if (GridBox[1] == 2)
     {
-        Draw(imgO, screen, gridW + 20, 20);
+        Draw(imgO, screen, width/3 + 20, 20);
     }
     if (GridBox[2] == 1)
     {
-        Draw(imgX,screen, (gridW * 2) + 20,20);
+        Draw(imgX,screen, (width/3 * 2) + 20,20);
     }
     else if (GridBox[2] == 2)
     {
-        Draw(imgO, screen, (gridW * 2) + 20, 20);
+        Draw(imgO, screen, (width/3 * 2) + 20, 20);
     }
     //row 2
     if (GridBox[3] == 1)
@@ -410,19 +411,19 @@ void DrawImage(int*GridBox, SDL_Surface *imgX, SDL_Surface *imgO, SDL_Surface *s
     }
     if (GridBox[4] == 1)
     {
-        Draw(imgX,screen, gridW + 20,180);
+        Draw(imgX,screen, width/3 + 20,180);
     }
     else if (GridBox[4] == 2)
     {
-        Draw(imgO, screen, gridW + 20, 180);
+        Draw(imgO, screen, width/3 + 20, 180);
     }
     if (GridBox[5] == 1)
     {
-        Draw(imgX,screen, (gridW * 2) + 20,180);
+        Draw(imgX,screen, (width/3 * 2) + 20,180);
     }
     else if (GridBox[5] == 2)
     {
-        Draw(imgO, screen, (gridW * 2) + 20, 180);
+        Draw(imgO, screen, (width/3 * 2) + 20, 180);
     }
     // row 3
     if (GridBox[6] == 1)
@@ -435,24 +436,23 @@ void DrawImage(int*GridBox, SDL_Surface *imgX, SDL_Surface *imgO, SDL_Surface *s
     }
     if (GridBox[7] == 1)
     {
-        Draw(imgX,screen, gridW + 20,340);
+        Draw(imgX,screen, width/3 + 20,340);
     }
     else if (GridBox[7] == 2)
     {
-        Draw(imgO, screen, gridW + 20, 340);
+        Draw(imgO, screen, width/3 + 20, 340);
     }
     if (GridBox[8] == 1)
     {
-        Draw(imgX,screen, (gridW * 2) + 20,340);
+        Draw(imgX,screen, (width/3 * 2) + 20,340);
     }
     else if (GridBox[8] == 2)
     {
-        Draw(imgO, screen, (gridW * 2) + 20, 340);
+        Draw(imgO, screen, (width/3 * 2) + 20, 340);
     }
 }
 int main ( int argc, char** argv )
 {
-    SDL_DisplayMode mode;
     //Keep track of the current frame
     int frame = 0;
 
@@ -461,16 +461,10 @@ int main ( int argc, char** argv )
 
     //The frame rate regulator
     Timer fps;
-
     SDL_Init(SDL_INIT_EVERYTHING);
     SDL_Window *window;
     SDL_Renderer* renderer;
-    SDL_Surface* screen = SDL_CreateRGBSurface( 0, width, height, 32, 0, 0, 0, 0 ); 
     SDL_Texture *textureImage = NULL;
-
-    SDL_GetDesktopDisplayMode(&mode);
-    printf ("The desktop display mode is %d x %d, %d Hz, %d BPP\n",
-            mode.w, mode.h, mode.refresh_rate, SDL_BITSPERPIXEL(mode.format));
 
     printf("sdl window created\n");
     window = SDL_CreateWindow("TicTacToe-SDL2",
@@ -493,6 +487,14 @@ int main ( int argc, char** argv )
     {
         return false;
     }
+
+    //testing to make sure screen size changed for later code
+    cout << "height: " << height << endl;
+    cout << "width: " << width << endl;
+    SDL_GetWindowSize(window, &width, &height);
+    SDL_Surface* screen = SDL_CreateRGBSurface( 0, width, height, 32, 0, 0, 0, 0 ); 
+    cout << "height: " << height << endl;
+    cout << "width: " << width << endl;
     // load images
     SDL_Surface *grid = IMG_Load("table.png");
     if (!grid)
@@ -506,23 +508,25 @@ int main ( int argc, char** argv )
         printf("Unable to load PNG: %s\n", SDL_GetError());
         return 1;
     }
-    //I needed to find a way to get the true dimensions of the game board so I can properly size the grid squares
-    int messageheight = messagebox -> h;
+    //I need to find a way to get the true dimensions of the game board so I can properly size the grid squares
+    int messageheight = messagebox -> h; cout << "message height" << messageheight;
     int screenheight = screen -> h;
     int boardheight = screenheight - messageheight; 
     //make grid squares
+    //I should also draw the game board here - no need to load an image
     //row 1
-    Square gridOne( 0, 0, width/3,boardheight/3);
-    Square gridTwo( gridW, 0,width/3,boardheight/3);
-    Square gridThree( gridW * 2, 0,width/3,boardheight/3);
+//x, y , width, height
+    Square gridOne( 0, 0, width/3,(height/3)-messageheight);
+    Square gridTwo( width/3, 0,width/3,(height/3)-messageheight);
+    Square gridThree( width/3 * 2, 0,width/3,(height/3)-messageheight);
     // row 2
-    Square gridFour( 0, boardheight/3,width/3,boardheight/3);
-    Square gridFive( gridW, boardheight/3,width/3,boardheight/3);
-    Square gridSix( gridW * 2, boardheight/3,width/3,boardheight/3);
+    Square gridFour( 0, boardheight/3,width/3,(height/3)-messageheight);
+    Square gridFive( width/3, boardheight/3,width/3,(height/3)-messageheight);
+    Square gridSix( width/3 * 2, boardheight/3,width/3,(height/3)-messageheight);
     // row 3
-    Square gridSeven( 0, (boardheight/3) * 2,width/3,boardheight/3);
-    Square gridEight( gridW, (boardheight/3) * 2,width/3,boardheight/3);
-    Square gridNine( gridW * 2, (boardheight/3) * 2,width/3,boardheight/3);
+    Square gridSeven( 0, (boardheight/3) * 2,width/3,(height/3)-messageheight);
+    Square gridEight( width/3, (boardheight/3) * 2,width/3,(height/3)-messageheight);
+    Square gridNine( width/3 * 2, (boardheight/3) * 2,width/3,(height/3)-messageheight);
     SDL_Surface *imgX = IMG_Load("x.png");
     if (!imgX)
     {
@@ -549,6 +553,8 @@ int main ( int argc, char** argv )
     {
         return false;
     }
+
+
     printf("Game Loop Starting\n");
     bool EndGame = false;
     bool done = false;
@@ -571,12 +577,11 @@ int main ( int argc, char** argv )
             {
                 // exit if ESCAPE is pressed
                 if (event.key.keysym.sym == SDLK_ESCAPE)
-                    done = true;
+                done = true;
                 break;
             }
             case SDL_MOUSEBUTTONDOWN:
             {
-                cout << "mouse clicked" << endl;
                 if (!EndGame){
                 //handle grid square events
                 gridOne.handle_events(1);
@@ -588,12 +593,16 @@ int main ( int argc, char** argv )
                 gridSeven.handle_events(7);
                 gridEight.handle_events(8);
                 gridNine.handle_events(9);
+                for (int i = 9 - 1; i >= 0; i--) 
+                    cout <<GridBox[i];
                 }
+                cout << endl;
             }
                 
             } // end switch
         } // end of message processing
         frame++;
+
         // DRAWING STARTS HERE
         Draw(grid,screen,0,0);
         Draw(messagebox,screen,0,height-messageheight);
