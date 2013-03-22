@@ -6,33 +6,38 @@
   -use a surface for loading all of the textures, and
    then copy it to a texture and render it.
 
+    need to scale x's and o's
+
 */
 
 //Linux
-//
+/*
 #include "SDL2/SDL.h"
 #include "SDL2/SDL_image.h"
 #include "SDL2/SDL_ttf.h"
 #include <iostream>
-//
+#include <sstream>
+*/
 using namespace std;
 
 //android
-//#include "SDL.h"
-//#include "SDL_image.h"
-//#include "SDL_ttf.h"
-//#include <iostream>
+#include "SDL.h"
+#include "SDL_image.h"
+#include "SDL_ttf.h"
+#include <iostream>
+#include <sstream>
 //
 int height = 640; //completely ignored on android
 int width = 480; // also completely ignored on android
 const int bpp = 32;
-const int FPS = 20;
+const int FPS = 15;
 
 int GridBox[9] = {};
 int player = 1;
 int winner = 0;
 SDL_Event event;
 int messageheight = 0;
+stringstream s;
 
 SDL_Surface Draw(SDL_Surface *img, SDL_Surface *screen, int x, int y)
 {;
@@ -514,6 +519,11 @@ void SDL_DrawLine(SDL_Surface* pDestination, int pX1, int pY1, int pX2, int pY2,
     if(locked)
         SDL_UnlockSurface(pDestination);
 }
+void message_panel(SDL_Surface* screen){
+SDL_Rect rect = {0, height-60, width, 60};
+
+SDL_FillRect(screen,&rect,100);
+}
 int main ( int argc, char** argv )
 {
     //Keep track of the current frame
@@ -558,15 +568,9 @@ int main ( int argc, char** argv )
     SDL_Surface* screen = SDL_CreateRGBSurface( 0, width, height, 32, 0, 0, 0, 0 ); 
     cout << "height: " << height << endl;
     cout << "width: " << width << endl;
-    // load images
-    SDL_Surface *messagebox = IMG_Load("messagebox.png");
-    if (!messagebox)
-    {
-        printf("Unable to load PNG: %s\n", SDL_GetError());
-        return 1;
-    }
+    
     //I need to find a way to get the true dimensions of the game board so I can properly size the grid squares
-    messageheight = messagebox -> h; cout << "message height" << messageheight << endl;
+    messageheight = 60;
     int screenheight = screen -> h;
     int boardheight = screenheight - messageheight; 
     //make grid squares
@@ -617,75 +621,6 @@ int main ( int argc, char** argv )
     // program main loop
     while (!done)
     {
-        // message processing loop
-        while (SDL_PollEvent(&event))
-        {
-            // check for messages
-            switch (event.type)
-            {
-                // exit if the window is closed
-            case SDL_QUIT:
-                done = true;
-                break;
-
-                // check for keypresses
-            case SDL_KEYDOWN:
-            {
-                // exit if ESCAPE is pressed
-                if (event.key.keysym.sym == SDLK_ESCAPE)
-                done = true;
-                break;
-            }
-            case SDL_MOUSEBUTTONDOWN:
-            {
-                if (!EndGame){
-                //handle grid square events
-                gridOne.handle_events(1);
-                gridTwo.handle_events(2);
-                gridThree.handle_events(3);
-                gridFour.handle_events(4);
-                gridFive.handle_events(5);
-                gridSix.handle_events(6);
-                gridSeven.handle_events(7);
-                gridEight.handle_events(8);
-                gridNine.handle_events(9);
-                for (int i = 9 - 1; i >= 0; i--) 
-                    cout <<GridBox[i];
-                }
-                cout << endl;
-            }
-                
-            } // end switch
-        } // end of message processing
-        frame++;
-
-        // DRAWING STARTS HERE
-        SDL_FillRect(screen,NULL,SDL_MapRGB ( screen->format, 0, 0, 0 )); 
-        Draw(messagebox,screen,0,height-messageheight);
-        SDL_DrawLine(screen,0, (height/3)-messageheight/2, width, (height/3)-messageheight/2,255);
-        SDL_DrawLine(screen,0, (height/3 + height/3)-messageheight/2, width, (height/3 + height/3)-messageheight/2,255);
-        SDL_DrawLine(screen,width/3, 0, width/3, height-messageheight,255);
-        SDL_DrawLine(screen,width/3+width/3, 0, width/3+width/3, height-messageheight,255);
-        // player turn (1 or 2)
-        if((player %2) == 1)
-        {
-            message = TTF_RenderText_Solid( font, "Player 1 Go!", textColor );
-            Draw( message, screen, 0 ,height-50 );
-        }
-        else if((player %2) == 0)
-        {
-            message = TTF_RenderText_Solid( font, "Player 2 Go!", textColor );
-            Draw( message, screen, 0, height-50);
-        }
-
-        DrawImage(GridBox, imgX, imgO, screen);
-        // DRAWING ENDS HERE
-        //Limit frame rate
-        if( ( cap == true ) && ( fps.get_ticks() < 1000 / FPS ) )
-        {
-            //Sleep the remaining frame time
-            SDL_Delay( ( 1000 / FPS ) - fps.get_ticks() );
-        }
         //win conditions
         //rows
         if (GridBox[0] == 1 && GridBox[1] == 1 && GridBox [2] == 1)
@@ -779,6 +714,76 @@ int main ( int argc, char** argv )
         {
             EndGame = true;
         }
+        // message processing loop
+        while (SDL_PollEvent(&event))
+        {
+            // check for messages
+            switch (event.type)
+            {
+                // exit if the window is closed
+            case SDL_QUIT:
+                done = true;
+                break;
+
+                // check for keypresses
+            case SDL_KEYDOWN:
+            {
+                // exit if ESCAPE is pressed
+                if (event.key.keysym.sym == SDLK_ESCAPE)
+                done = true;
+                break;
+            }
+            case SDL_MOUSEBUTTONDOWN:
+            {
+                if (!EndGame){
+                //handle grid square events
+                gridOne.handle_events(1);
+                gridTwo.handle_events(2);
+                gridThree.handle_events(3);
+                gridFour.handle_events(4);
+                gridFive.handle_events(5);
+                gridSix.handle_events(6);
+                gridSeven.handle_events(7);
+                gridEight.handle_events(8);
+                gridNine.handle_events(9);
+                for (int i = 9 - 1; i >= 0; i--) 
+                    cout <<GridBox[i];
+                }
+                cout << endl;
+            }
+                
+            } // end switch
+        } // end of message processing
+        frame++;
+
+        // DRAWING STARTS HERE
+        SDL_FillRect(screen,NULL,SDL_MapRGB ( screen->format, 0, 0, 0 )); 
+        message_panel(screen);
+        SDL_DrawLine(screen,0, (height/3)-messageheight/2, width, (height/3)-messageheight/2,255);
+        SDL_DrawLine(screen,0, (height/3 + height/3)-messageheight/2, width, (height/3 + height/3)-messageheight/2,255);
+        SDL_DrawLine(screen,width/3, 0, width/3, height-messageheight,255);
+        SDL_DrawLine(screen,width/3+width/3, 0, width/3+width/3, height-messageheight,255);
+        // player turn (1 or 2)
+        if((player %2) == 1)
+        {
+            message = TTF_RenderText_Solid( font, "Player 1 Go!", textColor );
+            Draw( message, screen, 0 ,height-50 );
+        }
+        else if((player %2) == 0)
+        {
+            message = TTF_RenderText_Solid( font, "Player 2 Go!", textColor );
+            Draw( message, screen, 0, height-50);
+        }
+
+        DrawImage(GridBox, imgX, imgO, screen);
+        // DRAWING ENDS HERE
+        //Limit frame rate
+        if( ( cap == true ) && ( fps.get_ticks() < 1000 / FPS ) )
+        {
+            //Sleep the remaining frame time
+            SDL_Delay( ( 1000 / FPS ) - fps.get_ticks() );
+        }
+        
         if(EndGame)
         {
             SDL_PollEvent(&event);
@@ -786,51 +791,70 @@ int main ( int argc, char** argv )
 
             if (winner == 1)
             {
-                Draw(messagebox,screen,0,height - messageheight);
                 message = TTF_RenderText_Solid( font, "Player 1 has won!", textColor );
-                replay_message = TTF_RenderText_Solid( font, "Press R to replay", textColor );
-                Draw( message, screen, 0, height-50);
-                Draw( replay_message, screen, width/2, height-50);
-                if(event.type == SDL_KEYDOWN)
-                {
-                    printf("key is down");
-                    if (event.key.keysym.sym == SDLK_r)
-                    {
-                        replay = true;
-                        printf("replay set to true");
-                    }
+                for(int i = 3; i > 0; i--){
+                    s << "Game Starting In: " << i;
+                    replay_message = TTF_RenderText_Solid(font, s.str().c_str(), textColor);
+                    message_panel(screen);
+                    Draw( message, screen, 0, height-50);
+                    Draw(replay_message,screen,width/2,height-50);
+                    textureImage = SDL_CreateTextureFromSurface(renderer,screen);
+
+                    SDL_RenderClear(renderer);
+                    SDL_RenderCopy(renderer, textureImage, NULL, NULL);
+                    SDL_RenderPresent(renderer);
+                    SDL_DestroyTexture(textureImage);
+                    cout << "\nGame starting in: " << i << endl;
+                    SDL_Delay(1000);
+                    s.str(std::string());
                 }
+                replay = true;
+                printf("\nGame Restarting\n");
             }
             else if (winner == 2)
             {
-                Draw(messagebox,screen,0,height - messageheight);
                 message = TTF_RenderText_Solid( font, "Player 2 has won!", textColor );
-                Draw( message, screen, 0,height-50);
-                replay_message = TTF_RenderText_Solid( font, "Press R to replay", textColor );
-                Draw( replay_message, screen, width/2, height-50);
-                if(event.type == SDL_KEYDOWN)
-                {
-                    if (event.key.keysym.sym == SDLK_r)
-                    {
-                        replay = true;
-                        printf("replay set to true");
-                    }
+                for(int i = 3; i > 0; i--){
+                    s << "Game Starting In: " << i;
+                    replay_message = TTF_RenderText_Solid(font, s.str().c_str(), textColor);
+                    message_panel(screen);
+                    Draw( message, screen, 0, height-50);
+                    Draw(replay_message,screen,width/2,height-50);
+                    textureImage = SDL_CreateTextureFromSurface(renderer,screen);
+
+                    SDL_RenderClear(renderer);
+                    SDL_RenderCopy(renderer, textureImage, NULL, NULL);
+                    SDL_RenderPresent(renderer);
+                    SDL_DestroyTexture(textureImage);
+                    cout << "\nGame starting in: " << i << endl;
+                    SDL_Delay(1000);
+                    s.str(std::string());
                 }
+                replay = true;
+                printf("\nGame Restarting\n");
             }
             else
             {
                 message = TTF_RenderText_Solid( font, "This is a tie!", textColor );
                 Draw( message, screen, width/3,0);
-                replay_message = TTF_RenderText_Solid( font, "Press R to replay", textColor );
-                Draw( replay_message, screen, width/2, height-50);
-                if(event.type == SDL_KEYDOWN)
-                {
-                    if (event.key.keysym.sym == SDLK_r)
-                    {
-                        replay = true;
-                        printf("replay set to true");
-                    }
+                for(int i = 3; i > 0; i--){
+                    s << "Game Starting In: " << i;
+                    replay_message = TTF_RenderText_Solid(font, s.str().c_str(), textColor);
+                    message_panel(screen);
+                    Draw( message, screen, 0, height-50);
+                    Draw(replay_message,screen,width/2,height-50);
+                    textureImage = SDL_CreateTextureFromSurface(renderer,screen);
+
+                    SDL_RenderClear(renderer);
+                    SDL_RenderCopy(renderer, textureImage, NULL, NULL);
+                    SDL_RenderPresent(renderer);
+                    SDL_DestroyTexture(textureImage);
+                    cout << "\nGame starting in: " << i << endl;
+                    SDL_Delay(1000);
+                    s.str(std::string());
                 }
+                replay = true;
+                printf("\nGame Restarting\n");
             }
 
             if (replay)
@@ -844,7 +868,6 @@ int main ( int argc, char** argv )
                 replay = false;
                 EndGame = false;
                 player = 1;
-                printf("replaying the game");
             }
 
         }
